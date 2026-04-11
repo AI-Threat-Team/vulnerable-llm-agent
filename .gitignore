@@ -1,0 +1,12 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Store only alice session
+!sessions/
+sessions/*
+!sessions/alice
+
+# logs
+logs/*
