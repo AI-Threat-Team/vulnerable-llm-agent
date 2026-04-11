@@ -84,11 +84,23 @@ def render_prompt(ev: dict):
     total = ev.get("total_chars", 0)
     print(f"\n{BLUE}{BOLD}┌─ FULL PROMPT{RESET} {DIM}({len(msgs)} messages, ~{total} chars){RESET}")
 
-    for msg in msgs:
+    # Find the index of the last user message (= current input, visible in Terminal 1)
+    last_user_idx = None
+    for i in range(len(msgs) - 1, -1, -1):
+        if msgs[i].get("role") == "user":
+            last_user_idx = i
+            break
+
+    for i, msg in enumerate(msgs):
         role = msg.get("role", "?")
         rc = {"system": MAGENTA, "user": GREEN, "assistant": BLUE, "tool": YELLOW}.get(role, WHITE)
 
+        # Is this the current user input? (last user message = what Terminal 1 shows)
+        is_current_input = (i == last_user_idx)
+
         header = f"{rc}{BOLD}[{role}]{RESET}"
+        if is_current_input:
+            header += f" {DIM}(current input){RESET}"
         if msg.get("tool_call_id"):
             header += f" {DIM}(call_id: {msg['tool_call_id']}){RESET}"
         if msg.get("name"):
@@ -96,8 +108,12 @@ def render_prompt(ev: dict):
         print(f"\n{dim_line(header)}")
 
         content = msg.get("content", "")
-        if content:
-            # Truncate very long system prompts in display
+        if is_current_input:
+            # Redact — user sees this in Terminal 1
+            n_chars = len(str(content))
+            print(dim_line(f"{DIM}[{n_chars} chars — see Terminal 1]{RESET}"))
+        elif content:
+            # Show full content for system, assistant, tool, history user messages
             lines = str(content).split("\n")
             if len(lines) > 30:
                 display = "\n".join(lines[:15] + [f"... ({len(lines) - 30} lines) ..."] + lines[-15:])
@@ -118,13 +134,23 @@ def render_llm_response(ev: dict):
     # Show just the message part if available, full raw otherwise
     try:
         msg = raw["choices"][0]["message"]
+        has_tool_calls = bool(msg.get("tool_calls"))
+
         if msg.get("content"):
-            print(dim_line(f"{GREEN}content:{RESET}"))
-            print(text_block(msg["content"]))
-        if msg.get("tool_calls"):
+            if has_tool_calls:
+                # Intermediate thinking — user doesn't see this, show in full
+                print(dim_line(f"{GREEN}content (intermediate):{RESET}"))
+                print(text_block(msg["content"]))
+            else:
+                # Final answer — user sees this in Terminal 1, redact here
+                n_chars = len(msg["content"])
+                print(dim_line(f"{DIM}content: [{n_chars} chars — see Terminal 1]{RESET}"))
+
+        if has_tool_calls:
             print(dim_line(f"{YELLOW}tool_calls:{RESET}"))
             print(json_block(msg["tool_calls"]))
-        if not msg.get("content") and not msg.get("tool_calls"):
+
+        if not msg.get("content") and not has_tool_calls:
             print(json_block(raw))
     except (KeyError, IndexError):
         print(json_block(raw))
@@ -165,8 +191,9 @@ def render_agent_state(ev: dict):
 
 def render_final_answer(ev: dict):
     answer = ev.get("answer", "")
+    n_chars = len(answer)
     print(f"\n{sep('FINAL ANSWER', GREEN)}")
-    print(f"{GREEN}{answer}{RESET}")
+    print(f"{DIM}  [{n_chars} chars — see Terminal 1]{RESET}")
 
 
 def render_error(ev: dict):
@@ -178,10 +205,11 @@ def render_error(ev: dict):
 
 
 def render_user_input(ev: dict):
-    text = ev.get("text", "")
     session = ev.get("session", "?")
+    text = ev.get("text", "")
+    n_chars = len(text)
     print(f"\n{sep(f'USER INPUT [{session}]', GREEN)}")
-    print(f"{GREEN}{BOLD}  > {text}{RESET}")
+    print(f"{DIM}  > [{n_chars} chars — see Terminal 1]{RESET}")
 
 
 def render_session_switch(ev: dict):
@@ -305,7 +333,10 @@ Examples:
     print(f"""
 {RED}{BOLD}┌──────────────────────────────────────────────┐
 │  VULN-AGENT  ·  Debug Viewer                 │
-│  Terminal 2: Full Trace Output               │
+│  Terminal 2: Internal Agent Trace            │
+│                                              │
+│  User input & final answers → Terminal 1     │
+│  Everything else → here                      │
 └──────────────────────────────────────────────┘{RESET}
 {DIM}Reading: {log}{RESET}
 {DIM}Mode: {'replay' if args.replay else 'follow (tail -f)'}{RESET}

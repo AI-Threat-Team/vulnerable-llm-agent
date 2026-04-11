@@ -1,12 +1,18 @@
-# Byte-compiled / optimized / DLL files
+# Runtime data
+logs/*.jsonl
 __pycache__/
-*.py[codz]
-*$py.class
+*.pyc
+
+# Environment
+.env
+.venv/
+
+# uv
+.python-version
+uv.lock
 
 # Store only alice session
 !sessions/
-sessions/*
+sessions/*/
 !sessions/alice
 
-# logs
-logs/*

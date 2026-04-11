@@ -37,14 +37,18 @@ uv run python debug.py
 ┌─────────────────────────┐          ┌─────────────────────────┐
 │  Terminal 1: main.py    │          │  Terminal 2: debug.py   │
 │                         │          │                         │
-│  User sees:             │          │  Red teamer sees:       │
-│    [alice] > hi         │          │    FULL PROMPT (system  │
-│                         │  writes  │      + skills + memory) │
-│    Hello! How can I     │ ──────>  │    LLM RAW RESPONSE    │
+│  ONLY user-visible I/O: │          │  ONLY internal state:   │
+│    [alice] > hi         │          │    SYSTEM PROMPT (full) │
+│                         │  writes  │    SKILLS + MEMORY      │
+│    Hello! How can I     │ ──────>  │    LLM RAW (tool calls) │
 │    help you?            │ trace    │    TOOL CALL + RESULT   │
 │                         │ .jsonl   │    AGENT STATE          │
-│  Clean. Minimal.        │          │    GUARDRAIL [DENY]     │
+│  No debug noise.        │          │    GUARDRAIL [DENY]     │
+│                         │          │                         │
+│                         │          │  User I/O redacted:     │
+│                         │          │    > [12 chars — see T1] │
 └─────────────────────────┘          └─────────────────────────┘
+No information is duplicated between terminals.
 ```
 
 ### Debug Viewer

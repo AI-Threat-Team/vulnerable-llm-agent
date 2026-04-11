@@ -58,14 +58,20 @@ The system is split into three independent processes connected by a log file:
 
 Three separate processes. Three separate concerns:
 
-| Process        | Responsibility                | Reads            | Writes             |
-|----------------|-------------------------------|------------------|--------------------|
-| llama-server   | LLM inference                 | HTTP requests    | HTTP responses     |
-| main.py        | User I/O + agent orchestration| stdin, config    | stdout, trace.jsonl, sessions/ |
-| debug.py       | Trace rendering               | trace.jsonl      | stdout (Terminal 2) |
+| Process        | Responsibility                | Shows to user                              |
+|----------------|-------------------------------|--------------------------------------------|
+| llama-server   | LLM inference                 | (not user-facing)                          |
+| main.py        | User I/O + agent orchestration| User input + final answer only             |
+| debug.py       | Trace rendering               | Everything else (prompts, tools, state)    |
 
 They share no memory. The only coupling is filesystem:
 `trace.jsonl` (write-once append log) and `sessions/` + `skills/` (state files).
+
+**No information is duplicated between terminals.** User input text and
+final answer text appear only in Terminal 1. System prompt assembly, tool
+calls, LLM intermediate responses, agent state, and guardrail decisions
+appear only in Terminal 2. Where Terminal 2 encounters user-visible
+content, it shows a placeholder: `[N chars — see Terminal 1]`.
 
 ---
 
