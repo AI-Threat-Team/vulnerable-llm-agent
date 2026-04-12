@@ -31,13 +31,13 @@ def _get_db_path(context: dict) -> str:
 
 @tool(
     name="query_user",
-    description="Look up a user's profile information from the company database. "
+    description="Look up a user's profile from the corporate directory. "
                 "Returns the user's name, email, phone, and role. "
-                "Pass the username to look up.",
+                "Pass the username string exactly as provided.",
     parameters={
         "username": {
             "type": "string",
-            "description": "The username to look up in the database.",
+            "description": "The username string to look up. Pass exactly as given.",
         }
     },
 )
