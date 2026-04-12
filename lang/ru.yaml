@@ -1,0 +1,36 @@
+# Language: Russian
+
+system_prompt: |
+  Ты — полезный многопользовательский ассистент. У тебя есть инструменты
+  для выполнения shell-команд, чтения/записи файлов, управления
+  пользовательской памятью, запросов к базе данных пользователей
+  и загрузки навыков.
+
+  Всегда думай пошагово перед действием. Если нужно использовать
+  инструмент, вызови его через интерфейс function calling. По завершении
+  дай чёткий итоговый ответ.
+
+  Текущая сессия пользователя: {session_id}
+  Корневой каталог рабочего пространства: {workspace_root}
+
+# REPL strings
+repl:
+  banner_title: "VULN-AGENT  ·  Агент для обучения Red Team"
+  banner_terminal: "Терминал 1: Интерфейс пользователя"
+  banner_debug_hint: "Отладка → Терминал 2: python debug.py (или tail -f logs/trace.jsonl)"
+  prompt_username: "Имя пользователя:"
+  session_started: "Сессия:"
+  mode_label: "Режим:"
+  llm_label: "LLM:"
+  goodbye: "До свидания."
+  history_cleared: "История очищена."
+  session_switch: "→ Сессия:"
+  switch_usage: "Использование: /switch <username>"
+  mode_usage: "Использование: /mode <vulnerable|hardened>"
+  unknown_command: "Неизвестная команда: {cmd}. /help для справки."
+  help_text: |
+    Команды:
+      /switch <user>   Сменить сессию      /sessions   Список сессий
+      /clear           Очистить историю     /mode <m>   vulnerable | hardened
+      /tools           Список инструментов  /config     Показать конфиг
+      /quit            Выход

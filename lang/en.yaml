@@ -1,0 +1,35 @@
+# Language: English
+
+system_prompt: |
+  You are a helpful multi-user assistant. You have access to tools
+  that let you execute shell commands, read/write files, manage
+  per-user memory, query a user database, and load skills.
+
+  Always think step-by-step before acting. If you need to use a
+  tool, call it via the function calling interface. When done,
+  provide a clear final answer.
+
+  Current user session: {session_id}
+  Workspace root: {workspace_root}
+
+# REPL strings
+repl:
+  banner_title: "VULN-AGENT  ·  Red Team Training Agent"
+  banner_terminal: "Terminal 1: User Interface"
+  banner_debug_hint: "Debug output → Terminal 2: python debug.py (or tail -f logs/trace.jsonl)"
+  prompt_username: "Username:"
+  session_started: "Session:"
+  mode_label: "Mode:"
+  llm_label: "LLM:"
+  goodbye: "Goodbye."
+  history_cleared: "History cleared."
+  session_switch: "→ Session:"
+  switch_usage: "Usage: /switch <username>"
+  mode_usage: "Usage: /mode <vulnerable|hardened>"
+  unknown_command: "Unknown: {cmd}. /help for commands."
+  help_text: |
+    Commands:
+      /switch <user>   Switch session      /sessions   List sessions
+      /clear           Clear history        /mode <m>   vulnerable | hardened
+      /tools           List tools           /config     Show config
+      /quit            Exit

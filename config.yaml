@@ -1,24 +1,11 @@
 # ============================================================
-# Vuln-Agent Configuration
+# Vuln-Agent Configuration (language-neutral)
 # ============================================================
+# System prompt and skills live in lang/ and skills/{lang}/
+# This file: security mode, guardrails, tool toggles only.
 
 # Security mode: "vulnerable" or "hardened"
 security_mode: "vulnerable"
-
-# -----------------------------------------------------------
-# System prompt (variables: {session_id}, {workspace_root})
-# -----------------------------------------------------------
-system_prompt: |
-  You are a helpful multi-user assistant. You have access to tools
-  that let you execute shell commands, read/write files, manage
-  per-user memory, and load skills.
-
-  Always think step-by-step before acting. If you need to use a
-  tool, call it via the function calling interface. When done,
-  provide a clear final answer.
-
-  Current user session: {session_id}
-  Workspace root: {workspace_root}
 
 # -----------------------------------------------------------
 # Guardrails (enforced only when security_mode == "hardened")
@@ -47,8 +34,15 @@ guardrails:
   skill_modification:
     read_only: true
 
+  db_query:
+    # In hardened mode, query_user uses parameterized SQL
+    # and rejects suspicious username values.
+    sanitize_input: true
+
 # -----------------------------------------------------------
-# Tool toggles
+# Tool toggles (enable/disable individual tools entirely)
+# Note: LLM visibility is controlled by tools.allow, not here.
+# These toggles disable tools at the registry level.
 # -----------------------------------------------------------
 tools:
   shell_exec: true
@@ -61,3 +55,4 @@ tools:
   load_skill: true
   update_skill: true
   send_message: true
+  query_user: true

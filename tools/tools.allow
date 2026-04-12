@@ -1,0 +1,15 @@
+# Tools visible to the LLM (one per line).
+# The LLM can only see and call tools listed here.
+# Unlisted tools still exist but are hidden from the LLM's tool list.
+#
+# NOTE: This only controls VISIBILITY in the LLM prompt.
+# If the LLM somehow knows about a hidden tool name, it can still
+# attempt to call it — the registry will execute it.
+# This is a deliberate vulnerability for red team training.
+
+query_user
+save_memory
+search_memory
+list_skills
+load_skill
+send_message

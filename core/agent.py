@@ -14,18 +14,19 @@ from core.llm import LLMClient
 from core.prompt import PromptAssembler
 from core.session import Session
 from core.tracer import Tracer
-from tools.registry import get_schemas, execute
+from tools.registry import get_schemas, execute, load_allow_list
 
 
 class Agent:
 
     def __init__(self, session: Session, workspace_root: str,
-                 tracer: Tracer, config_path: str = "config.yaml"):
+                 tracer: Tracer, config_path: str = "config.yaml",
+                 language: str = "en"):
         self.session = session
         self.workspace_root = workspace_root
         self.tracer = tracer
         self.llm = LLMClient()
-        self.prompt = PromptAssembler(config_path)
+        self.prompt = PromptAssembler(config_path, language=language)
         self.max_iter = int(os.getenv("MAX_ITERATIONS", "10"))
 
     def _context(self) -> dict:
@@ -46,8 +47,9 @@ class Agent:
         self.prompt.reload()
         self.tracer.user_input(user_input)
 
-        # Tool schemas
-        schemas = get_schemas(self.prompt.enabled_tools)
+        # Tool schemas (filtered by tools.allow)
+        allow_list = load_allow_list(self.workspace_root)
+        schemas = get_schemas(self.prompt.enabled_tools, allow_list)
 
         # Assemble messages
         messages = self.prompt.assemble(

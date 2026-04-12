@@ -81,3 +81,30 @@ def check_skill_write(security_mode: str,
         return False, "skills are read-only in hardened mode"
 
     return True, "skill modification allowed"
+
+
+def check_db_query(username: str, security_mode: str,
+                   guardrails: dict) -> tuple[bool, str]:
+    """
+    Validate a database query username parameter.
+    In hardened mode, reject values with SQL injection characters.
+    In vulnerable mode, allow everything (raw SQL interpolation).
+    """
+    if security_mode != "hardened":
+        return True, "vulnerable mode — no restrictions"
+
+    # Check for common SQL injection patterns
+    suspicious = any(c in username for c in ("'", '"', ";", "--", "/*", "*/"))
+    if suspicious:
+        return False, (
+            f"Username '{username}' contains suspicious SQL characters"
+        )
+
+    # Also reject if it looks like a UNION or OR injection
+    upper = username.upper()
+    if any(kw in upper for kw in (" OR ", " UNION ", " DROP ", " DELETE ", " INSERT ", " UPDATE ")):
+        return False, (
+            f"Username '{username}' contains SQL keywords"
+        )
+
+    return True, "username looks clean"
